@@ -13,7 +13,7 @@ library(multiROC)
 library(ggplot2)  
 library(gridExtra)   
 library(grid)
-
+library(dummies)
 
 #data
 data("iris")
