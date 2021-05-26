@@ -12,3 +12,6 @@ Visulaization of the statistics.
 #Example dataset
 
 iris dataset
+
+#Example visulaization
+![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
