@@ -2,6 +2,8 @@
 #install_github("WandeRum/multiROC")
 # Libraries
 library(keras)
+library(e1071)
+library(randomForest)
 library(mlbench) 
 library(dplyr)
 library(magrittr)
@@ -10,15 +12,14 @@ library(kernlab)
 library(multiROC)
 library(ggplot2)  
 library(gridExtra)   
-library(grid) 
+library(grid)
+
 
 #data
 data("iris")
 data <- iris
 str(data)
 
-
-#partition
 # Partition
 set.seed(1234)
 total_number <- nrow(data)
