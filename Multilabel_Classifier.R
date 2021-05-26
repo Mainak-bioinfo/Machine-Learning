@@ -1,6 +1,5 @@
-require(devtools)
-install_github("WandeRum/multiROC")
-
+#require(devtools)
+#install_github("WandeRum/multiROC")
 # Libraries
 library(keras)
 library(mlbench) 
@@ -9,7 +8,9 @@ library(magrittr)
 library(caret)
 library(kernlab)
 library(multiROC)
-
+library(ggplot2)  
+library(gridExtra)   
+library(grid) 
 
 #data
 data("iris")
@@ -72,9 +73,9 @@ str(test_df_depp)
 
 
 #hot encoding
-train_Labels<-model.matrix(~0+train_df_depp_target)
+train_Labels<-model.matrix(~0+train_df_depp_target) # binary convesion of all the labels
 attr(train_Labels, "dimnames")[[2]] <- levels(iris$Species) #rename the column
-test_Labels<-model.matrix(~0+test_df_depp_target)
+test_Labels<-model.matrix(~0+test_df_depp_target) # binary convesion of all the labels
 attr(test_Labels, "dimnames")[[2]] <- levels(iris$Species) #rename the column
 
 # Create Model
@@ -115,8 +116,8 @@ deep_pred_conf <- predict(deep_pred_conf, test_df_depp_target) ## for confusion 
 colnames(deep_pred)<-paste(colnames(test_Labels),"_pred_Deeplearn")
 
 
-
-#merge true label and pred label
+#preparing for multi ROC curves 
+#merging true label and pred label
 true_label <- dummies::dummy(test_df$Species, sep = ".")
 true_label <- data.frame(true_label)
 colnames(true_label) <- gsub(".*?\\.", "", colnames(true_label))
@@ -125,19 +126,14 @@ final_df <- cbind(true_label,rf_pred,nb_pred,svm_pred,deep_pred)
 
 
 head(final_df)
-#multi roc and multi pr
+#multi roc
 roc_res <- multi_roc(final_df, force_diag=T)
-pr_res <- multi_pr(final_df, force_diag=T)
-
 
 #plot
 plot_roc_df <- plot_roc_data(roc_res)
 plot_roc_df<-plot_roc_df%>%
   filter(!Group %in% c("Macro","Micro")) ## remove no needed rows
-plot_pr_df <- plot_pr_data(pr_res)
-head(plot_roc_df)
 
-require(ggplot2)
 ggplot(plot_roc_df, aes(x = 1-Specificity, y=Sensitivity)) +
   geom_path(aes(color = Group, linetype=Method), size=1) +
   geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1), 
@@ -147,36 +143,10 @@ ggplot(plot_roc_df, aes(x = 1-Specificity, y=Sensitivity)) +
         legend.justification=c(1, 0), legend.position=c(.95, .05),
         legend.title=element_blank(), 
         legend.background = element_rect(fill=NULL, size=0.5, 
-                                         linetype="solid", colour ="black"))
+                                         linetype="solid", colour ="black")) #visualization of comparative analysis of algorithm and also label based on ROC
 
-ggplot(plot_pr_df, aes(x=Recall, y=Precision)) + 
-  geom_path(aes(color = Group, linetype=Method), size=1.5) + 
-  theme_bw() + 
-  theme(plot.title = element_text(hjust = 0.5), 
-        legend.justification=c(1, 0), legend.position=c(.95, .05),
-        legend.title=element_blank(), 
-        legend.background = element_rect(fill=NULL, size=0.5, 
-                                         linetype="solid", colour ="black"))
 
-save.image(file = "multiroc.RData")
-load
-
-##rough code start
-# Prediction & confusion matrix - test data
-prob <- model %>%
-  predict_proba(test_df_depp)
-
-pred <- model %>%
-  predict_classes(test_df_depp)
-table1 <- table(Predicted = pred, Actual = test_df_depp_target)
-
-cbind(prob, pred, test_df_depp_target)
-##rough codes stops
-
-###############confusion matrix##################################
-library(ggplot2)   
-library(gridExtra)   
-library(grid)        
+###############CONFUSION MATRIX##################################       
 #creating a confusion matrix
 #randomforest start#
 confusion_rf<-confusionMatrix(test_df$Species,rf_pred_conf)
@@ -228,8 +198,9 @@ confusion_svm_st_p <-  tableGrob(confusion_svm_st)
 # add confusion matrix plotting and stats together
 grid.arrange(confusion_svm_d_p, confusion_svm_st_p,nrow = 1, ncol = 2, 
              top=textGrob("Confusion Matrix and stats for SVM",gp=gpar(fontsize=12,font=1)))
-#svm end
-#naive start
+#svm end#
+
+#naive bayes start#
 
 confusion_nb<-confusionMatrix(test_df$Species,nb_pred_conf)
 
@@ -239,9 +210,7 @@ confusion_nb_d <- as.data.frame(confusion_nb$table)
 # confusion matrix statistics as data.frame and round up
 confusion_nb_st <-data.frame(round(confusion_nb$overall,2))
 
-
 # confusion matrix plotting is ON
-
 confusion_nb_d_p <-  ggplot(data = confusion_nb_d, aes(x = Prediction , y =  Reference, fill = Freq))+
   geom_tile() +
   geom_text(aes(label = paste("",Freq)), color = 'black', size = 6) +
@@ -255,7 +224,7 @@ confusion_nb_st_p <-  tableGrob(confusion_nb_st)
 grid.arrange(confusion_nb_d_p, confusion_nb_st_p,nrow = 1, ncol = 2, 
              top=textGrob("Confusion Matrix and stats for Randomforest",gp=gpar(fontsize=12,font=1)))
 
-#naives bayes end
+#naives bayes end#
 
 #deep learning start#
 
@@ -267,9 +236,7 @@ confusion_deep_d <- as.data.frame(confusion_deep$table)
 # confusion matrix statistics as data.frame and round up
 confusion_deep_st <-data.frame(round(confusion_deep$overall,2))
 
-
 # confusion matrix plotting is ON
-
 confusion_deep_d_p <-  ggplot(data = confusion_deep_d, aes(x = Prediction , y =  Reference, fill = Freq))+
   geom_tile() +
   geom_text(aes(label = paste("",Freq)), color = 'black', size = 6) +
