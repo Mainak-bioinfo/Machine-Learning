@@ -14,4 +14,4 @@ Visulaization of the statistics.
 iris dataset
 
 #Example visulaization
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![alt text](ROC_ALL classifier.bmp)
