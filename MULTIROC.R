@@ -1,7 +1,5 @@
 require(devtools)
 install_github("WandeRum/multiROC")
-require(multiROC)
-library(multiROC)
 
 # Libraries
 library(keras)
@@ -10,13 +8,14 @@ library(dplyr)
 library(magrittr)
 library(caret)
 library(kernlab)
+library(multiROC)
+
 
 #data
 data("iris")
 data <- iris
 str(data)
 
-#write.csv(data,"D:\\analysis\\r\\MULTIROC\\iris.csv")
 
 #partition
 # Partition
@@ -39,15 +38,6 @@ rf_pred <- data.frame(rf_pred)
 colnames(rf_pred) <- paste(colnames(rf_pred), "_pred_RF")
 
 confusionMatrix(test_df$Species,rf_pred_conf)
-
-#multinomial
-mn_res <- nnet::multinom(Species ~., data = train_df)
-mn_pred <- predict(mn_res, test_df, type = 'prob')
-mn_pred_conf <- predict(mn_res, test_df) ## for confusion matrix
-mn_pred <- data.frame(mn_pred)
-colnames(mn_pred) <- paste(colnames(mn_pred), "_pred_MN")
-
-confusionMatrix(test_df$Species,mn_pred_conf)
 
 
 #SVM
@@ -183,8 +173,10 @@ table1 <- table(Predicted = pred, Actual = test_df_depp_target)
 cbind(prob, pred, test_df_depp_target)
 ##rough codes stops
 
-###############confusion matrix##################################3
-
+###############confusion matrix##################################
+library(ggplot2)   
+library(gridExtra)   
+library(grid)        
 #creating a confusion matrix
 #randomforest start#
 confusion_rf<-confusionMatrix(test_df$Species,rf_pred_conf)
@@ -194,17 +186,6 @@ confusion_rf_d <- as.data.frame(confusion_rf$table)
 
 # confusion matrix statistics as data.frame and round up
 confusion_rf_st <-data.frame(round(confusion_rf$overall,2))
-
-
-# here we also have the rounded percentage values
-#confusion_rf_p <- as.data.frame(prop.table(confusion_rf$table))
-#confusion_rf_d$Perc <- round(confusion_rf_p$Freq*100,2)
-
-#get set go for plot
-
-library(ggplot2)     # to plot
-library(gridExtra)   # to put more
-library(grid)        # plot together
 
 # confusion matrix plotting is ON
 
@@ -233,17 +214,6 @@ confusion_svm_d <- as.data.frame(confusion_svm$table)
 # confusion matrix statistics as data.frame and round up
 confusion_svm_st <-data.frame(round(confusion_svm$overall,2))
 
-
-# here we also have the rounded percentage values
-#confusion_svm_p <- as.data.frame(prop.table(confusion_svm$table))
-#confusion_svm_d$Perc <- round(confusion_svm_p$Freq*100,2)
-
-#get set go for plot
-
-library(ggplot2)     # to plot
-library(gridExtra)   # to put more
-library(grid)        # plot together
-
 # confusion matrix plotting is ON
 
 confusion_svm_d_p <-  ggplot(data = confusion_svm_d, aes(x = Prediction , y =  Reference, fill = Freq))+
@@ -269,16 +239,6 @@ confusion_nb_d <- as.data.frame(confusion_nb$table)
 # confusion matrix statistics as data.frame and round up
 confusion_nb_st <-data.frame(round(confusion_nb$overall,2))
 
-
-# here we also have the rounded percentage values
-#confusion_nb_p <- as.data.frame(prop.table(confusion_nb$table))
-#confusion_nb_d$Perc <- round(confusion_nb_p$Freq*100,2)
-
-#get set go for plot
-
-library(ggplot2)     # to plot
-library(gridExtra)   # to put more
-library(grid)        # plot together
 
 # confusion matrix plotting is ON
 
@@ -307,16 +267,6 @@ confusion_deep_d <- as.data.frame(confusion_deep$table)
 # confusion matrix statistics as data.frame and round up
 confusion_deep_st <-data.frame(round(confusion_deep$overall,2))
 
-
-# here we also have the rounded percentage values
-#confusion_deep_p <- as.data.frame(prop.table(confusion_deep$table))
-#confusion_deep_d$Perc <- round(confusion_deep_p$Freq*100,2)
-
-#get set go for plot
-
-library(ggplot2)     # to plot
-library(gridExtra)   # to put more
-library(grid)        # plot together
 
 # confusion matrix plotting is ON
 
