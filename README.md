@@ -7,7 +7,7 @@ Built a multilabel classifier using Machine learning and Deep learning approache
 
 Comparative analysis of different classifier.
 
-Visulaization of the statistics.
+Visualization of the statistics.
 
 #Example dataset
 
