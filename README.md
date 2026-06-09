@@ -13,7 +13,7 @@ Visualization of the statistics.
 
 iris dataset
 
-#Example visulaization
+#Example visualization
 
 Gives an overview of the codes.Do wait patiently.....
 
